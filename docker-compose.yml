@@ -4,7 +4,7 @@ services:
   api:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: api.Dockerfile
     restart: always
     networks:
       - default
@@ -22,7 +22,9 @@ services:
     depends_on:
       - db
   db:
-    image: mysql:8.0
+    build:
+      context: .
+      dockerfile: db.Dockerfile
     restart: always
     ports:
       - 3366:3306
@@ -31,7 +33,6 @@ services:
       - MYSQL_DATABASE=$DB_NAME
     volumes:
       - db_data:/var/lib/mysql
-      - ./init:/docker-entrypoint-initdb.d
     networks:
       - default
 networks:

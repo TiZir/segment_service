@@ -1,5 +1,7 @@
 package db
 
+import "database/sql"
+
 type Compliance struct {
 	IdUser      int    `json:"id_user"`
 	NameSegment string `json:"name_segment"`
@@ -26,7 +28,7 @@ func DeleteCompliance(compliances []Compliance) error {
 		return err
 	}
 	for key, _ := range compliances {
-		_, err = database.Exec("DELETE FROM compliance WHERE id = ? AND name = ",
+		_, err = database.Exec("DELETE FROM compliance WHERE id_user = ? AND name = ",
 			compliances[key].IdUser, compliances[key].NameSegment)
 		if err != nil {
 			return err
@@ -41,10 +43,12 @@ func SelectComplianceById(id int) ([]Compliance, error) {
 	if err != nil {
 		return compliances, err
 	}
-	rows, err := database.Query("SELECT * FROM compliance WHERE id = ?", id)
+	rows, err := database.Query("SELECT id_user, ifnull(name_segment, \"\") as name_segment FROM compliance WHERE id_user = ?", id)
 	if err != nil {
 		return compliances, err
 	}
+	defer rows.Close()
+
 	for rows.Next() {
 		var c Compliance
 		err = rows.Scan(&c.IdUser, &c.NameSegment)
@@ -62,17 +66,25 @@ func SelectCompliance() ([]Compliance, error) {
 	if err != nil {
 		return compliances, err
 	}
-	rows, err := database.Query("SELECT * FROM compliance")
+
+	rows, err := database.Query("SELECT id_user, ifnull(name_segment, \"\") as name_segment FROM compliance")
 	if err != nil {
 		return compliances, err
 	}
+	defer rows.Close()
+
 	for rows.Next() {
 		var c Compliance
-		err = rows.Scan(&c.IdUser, &c.NameSegment)
+		err := rows.Scan(&c.IdUser, &c.NameSegment)
+		defer rows.Close()
 		if err != nil {
+			if err == sql.ErrNoRows {
+				return compliances, err
+			}
 			return compliances, err
 		}
 		compliances = append(compliances, c)
 	}
+
 	return compliances, nil
 }
