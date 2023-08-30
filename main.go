@@ -19,18 +19,24 @@ func compliancePage(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	jsonData, err := json.Marshal(compliance)
+	if err != nil {
+		log.Fatal("Error marshaling data to JSON:", err)
+		// http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		// return
+	}
 	fmt.Println("Endpoint Hit: compliancePage")
-	json.NewEncoder(w).Encode(compliance)
 	w.Header().Set("Content-Type", "application/json")
+	w.Write(jsonData)
 }
 
 func main() {
-	err := db.OpenEnv()
-	if err != nil {
-		log.Fatal(err)
-	}
 	http.HandleFunc("/", homePage)
 	http.HandleFunc("/compliance", compliancePage)
+	// err := db.OpenEnv()
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		log.Fatal(err)
 	}
