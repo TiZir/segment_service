@@ -1,0 +1,4 @@
+2023/08/30 18:29:33 App started successfully
+2023/08/30 18:32:06 App started successfully
+2023/08/30 19:20:12 Error adding to segment: Error 1062 (23000): Duplicate entry 'TEST_1' for key 'segment.PRIMARY'
+2023/08/30 19:30:33 Incorrect id_user for get compliance: strconv.Atoi: parsing "asdassd": invalid syntax

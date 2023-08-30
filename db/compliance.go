@@ -44,8 +44,8 @@ func DeleteCompliance(data []string, id int) error {
 		var flag bool
 		compliance.IdUser = id
 		compliance.NameSegment = data[key]
-		if flag, err = ExistDataInCompliance(compliance); !flag && err == nil {
-			_, err = database.Exec("DELETE FROM compliance WHERE id_user = ? AND name = ?;",
+		if flag, err = ExistDataInCompliance(compliance); flag && err == nil {
+			_, err = database.Exec("DELETE FROM compliance WHERE id_user = ? AND name_segment = ?;",
 				compliance.IdUser, compliance.NameSegment)
 			if err != nil {
 				return err
@@ -65,7 +65,7 @@ func SelectComplianceById(id int) ([]Compliance, error) {
 	if err != nil {
 		return compliances, err
 	}
-	rows, err := database.Query("SELECT * FROM compliance WHERE id_user = ?;", id)
+	rows, err := database.Query("SELECT * FROM compliance WHERE id_user = ? ORDER BY name_segment;", id)
 	if err != nil {
 		return compliances, err
 	}
@@ -89,7 +89,7 @@ func SelectCompliance() ([]Compliance, error) {
 		return compliances, err
 	}
 
-	rows, err := database.Query("SELECT * FROM compliance;")
+	rows, err := database.Query("SELECT * FROM compliance ORDER BY id_user;")
 	if err != nil {
 		return compliances, err
 	}
@@ -119,7 +119,8 @@ func ExistDataInCompliance(compliance Compliance) (bool, error) {
 	rows, err := database.Query(
 		"SELECT * "+
 			"FROM compliance "+
-			"WHERE id_user = ? AND name_segment = ?;",
+			"WHERE id_user = ? AND name_segment = ? "+
+			"ORDER BY id_user;",
 		compliance.IdUser,
 		compliance.NameSegment,
 	)
