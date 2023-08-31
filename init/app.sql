@@ -6,23 +6,19 @@ CREATE TABLE `segment`
     PRIMARY KEY (`name`)
 );
 
-INSERT INTO `segment`(name) VALUES ("AVITO_VOICE_MESSAGES");
-INSERT INTO `segment`(name) VALUES ("AVITO_PERFORMANCE_VAS");
-INSERT INTO `segment`(name) VALUES ("AVITO_DISCOUNT_30");
-INSERT INTO `segment`(name) VALUES ("AVITO_DISCOUNT_50");
-
 CREATE TABLE `compliance`
 (
     id_user INT NOT NULL,
-    name_segment VARCHAR(255) DEFAULT NULL,
-    UNIQUE KEY `ukey_id_name` (`id_user`,`name_segment`),
+    name_segment VARCHAR(255) NOT NULL,
+    UNIQUE KEY `ukey_compliance_id_name` (`id_user`,`name_segment`),
     FOREIGN KEY (`name_segment`) REFERENCES `segment` (`name`) ON DELETE CASCADE
 );
 
-INSERT INTO `compliance` VALUES (1000, "AVITO_VOICE_MESSAGES");
-INSERT INTO `compliance` VALUES (1000, "AVITO_PERFORMANCE_VAS");
-INSERT INTO `compliance` VALUES (1000, "AVITO_DISCOUNT_30");
-INSERT INTO `compliance` VALUES (1002, "AVITO_VOICE_MESSAGES");
-INSERT INTO `compliance` VALUES (1002, "AVITO_PERFORMANCE_VAS");
-INSERT INTO `compliance` VALUES (1002, "AVITO_DISCOUNT_50");
-INSERT INTO `compliance` VALUES (1004, NULL);
+CREATE TABLE `history`
+(
+    id_user INT NOT NULL,
+    name_segment VARCHAR(255) NOT NULL,
+    ts_add TIMESTAMP NOT NULL,
+    ts_del TIMESTAMP DEFAULT NULL,
+    UNIQUE KEY `ukey_history_id_name` (`id_user`,`name_segment`)
+);

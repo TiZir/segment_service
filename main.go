@@ -1,43 +1,45 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
+	"os"
 
-	"github.com/TiZir/segment_service/db"
+	"github.com/TiZir/segment_service/handler"
+	"github.com/TiZir/segment_service/helper"
+	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
 )
 
-func homePage(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Welcome to the HomePage!")
-	fmt.Println("Endpoint Hit: homePage")
-}
+var _ = godotenv.Load(".env")
 
-func compliancePage(w http.ResponseWriter, r *http.Request) {
-	compliance, err := db.SelectCompliance()
-	if err != nil {
-		log.Fatal(err)
-	}
-	jsonData, err := json.Marshal(compliance)
-	if err != nil {
-		log.Fatal("Error marshaling data to JSON:", err)
-		// http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		// return
-	}
-	fmt.Println("Endpoint Hit: compliancePage")
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(jsonData)
+func homePage(w http.ResponseWriter, r *http.Request) {
+	log.Println("App started successfully")
+	helper.MakeRespons(w, "App started successfully", http.StatusOK, nil)
 }
 
 func main() {
-	http.HandleFunc("/", homePage)
-	http.HandleFunc("/compliance", compliancePage)
-	// err := db.OpenEnv()
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	if err := http.ListenAndServe(":8080", nil); err != nil {
+	file, err := os.OpenFile("logfile.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.SetOutput(file)
+	defer file.Close()
+
+	router := mux.NewRouter()
+	router.HandleFunc("/", homePage).Methods("GET")
+
+	router.HandleFunc("/segments", handler.GetSegments).Methods("GET")
+	router.HandleFunc("/segments/create/{name}", handler.CreateSegment)
+	router.HandleFunc("/segments/delete/{name}", handler.DeleteSegment)
+
+	router.HandleFunc("/compliances", handler.GetCompliance).Methods("GET")
+	router.HandleFunc("/compliances/{id_user}", handler.GetComplianceById).Methods("GET")
+	router.HandleFunc("/compliances/{id_user}/segments", handler.AddUserToCompliance).Methods("PUT")
+
+	router.HandleFunc("/history", handler.WriteCSV).Methods("GET")
+
+	if err := http.ListenAndServe(":8080", router); err != nil {
 		log.Fatal(err)
 	}
 }
