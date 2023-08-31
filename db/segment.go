@@ -72,7 +72,6 @@ func SelectSegmentTest() ([]Segment, error) {
 	for rows.Next() {
 		var s Segment
 		err := rows.Scan(&s.Name)
-		defer rows.Close()
 		if err != nil {
 			if err == sql.ErrNoRows {
 				return segments, err
