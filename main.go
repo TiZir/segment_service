@@ -24,6 +24,7 @@ func main() {
 		log.Fatal(err)
 	}
 	log.SetOutput(file)
+	defer file.Close()
 
 	router := mux.NewRouter()
 	router.HandleFunc("/", homePage).Methods("GET")
@@ -35,6 +36,8 @@ func main() {
 	router.HandleFunc("/compliances", handler.GetCompliance).Methods("GET")
 	router.HandleFunc("/compliances/{id_user}", handler.GetComplianceById).Methods("GET")
 	router.HandleFunc("/compliances/{id_user}/segments", handler.AddUserToCompliance).Methods("PUT")
+
+	router.HandleFunc("/history", handler.WriteCSV).Methods("GET")
 
 	if err := http.ListenAndServe(":8080", router); err != nil {
 		log.Fatal(err)

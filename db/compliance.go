@@ -29,8 +29,24 @@ func InsertCompliance(data []string, id int) error {
 		if err != nil {
 			return err
 		}
-	}
 
+		//history
+		if flag, err = ExistDataInHistory(compliance); !flag && err == nil {
+			err := InsertHistory(compliance)
+			if err != nil {
+				return err
+			}
+		} else {
+			if err != nil {
+				return err
+			}
+			err := UpdateHistory(compliance, true)
+			if err != nil {
+				return err
+			}
+		}
+
+	}
 	return err
 }
 
@@ -54,8 +70,18 @@ func DeleteCompliance(data []string, id int) error {
 		if err != nil {
 			return err
 		}
-	}
 
+		//history
+		if flag, err = ExistDataInHistory(compliance); flag && err == nil {
+			err := UpdateHistory(compliance, false)
+			if err != nil {
+				return err
+			}
+		}
+		if err != nil {
+			return err
+		}
+	}
 	return err
 }
 
@@ -98,7 +124,6 @@ func SelectCompliance() ([]Compliance, error) {
 	for rows.Next() {
 		var c Compliance
 		err := rows.Scan(&c.IdUser, &c.NameSegment)
-		defer rows.Close()
 		if err != nil {
 			if err == sql.ErrNoRows {
 				return compliances, err
